@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <mqoai.h>
+#include <stdlib.h>
 
 typedef struct{
     int number;
@@ -13,11 +13,12 @@ typedef struct {
     Student s[20];
     int length;
 }Sqlist;
+
 typedef struct{
     char name[20];
 }Name;
 
-int RoomStuNum(Sqlist l,int building,int room){
+int RoomStuNum(Sqlist l,int building,int room){  //返回那个房间现在的学生人数
     int i=1;
     l.length=0;
     FILE *fp1;
@@ -52,10 +53,6 @@ void Sort_select(int array[10],int length){
         array[j]=begin;
         array[location]=tmp;
     }
-    for (int i = 0; i < length; ++i) {
-        printf("%d  ",array[i]);
-    }
-    printf("\n");
 }
 
 int* Sort_insert(int array[10],int length){
@@ -64,16 +61,13 @@ int* Sort_insert(int array[10],int length){
         if(array[i] < array[i-1]){  //当前方已经排好序的元素比当前元素大时，用temp临时变量存储
             temp = array[i];
             for (j = i-1;j >= 0 && array[j] > temp; j--) {    //检查前面所有已经排好的元素
-                array[j+1] = array[j];//所有元素往后挪动一位
+                array[j+1] = array[j];//此元素到比它大的元素之间 所有元素往后挪动一位
             }
             array[j+1] = temp;//将temp里的值复制到插入位置
         }
     }
     return array;
-//    for (int i = 0; i < length; ++i) {
-//        printf("%d  ",array[i]);
-//    }
-//    printf("\n");
+
 }
 
 void Sort_bubble(int array[10],int length){
@@ -86,10 +80,6 @@ void Sort_bubble(int array[10],int length){
             }
         }
     }
-    for (int i = 0; i < length; ++i) {
-        printf("%d  ",array[i]);
-    }
-    printf("\n");
 }
 
 void createStudent(Sqlist l,int n){
@@ -109,12 +99,6 @@ void createStudent(Sqlist l,int n){
         scanf("%d",&l.s[i].building);
         getchar();
         //男生 1,2,3宿舍楼  女生4，5，6宿舍楼
-
-        printf("房间号：");
-        scanf("%d",&l.s[i].room);
-        getchar();
-        //判断此房间号有几个人 <6人才能分配
-
         if(l.s[i].gender==0) {
             if (l.s[i].building == 4 || l.s[i].building == 5 || l.s[i].building == 6) {
             } else {
@@ -130,6 +114,11 @@ void createStudent(Sqlist l,int n){
                 getchar();
             }
         }
+        printf("房间号：");
+        scanf("%d",&l.s[i].room);
+        getchar();
+        //判断此房间号有几个人 <6人才能分配
+
         if(RoomStuNum(l,l.s[i].building,l.s[i].room)>=6){
             printf("该宿舍的人数已经满了！请重新为其分配宿舍,输入宿舍号：");
             scanf("%d",&l.s[i].room);
@@ -138,7 +127,6 @@ void createStudent(Sqlist l,int n){
     }
     FILE *fp;
     fp= fopen("data.txt","a");
-
     for(int i=1;i<=l.length;i++){
         fprintf(fp,"%d %s %d %d %d\n",l.s[i].number,l.s[i].name,l.s[i].gender,l.s[i].building,l.s[i].room);
     }
@@ -148,7 +136,7 @@ void createStudent(Sqlist l,int n){
 Sqlist NameSort1(Sqlist l){
     Student begin;
     int location;
-    for (int j = 0; j < l.length-1; ++j) {
+    for (int j = 0; j < l.length-1; ++j) {   //选择排序
         begin=l.s[j];
         location=j;
         for (int i = j+1; i < l.length; ++i) {//找出除j往后 最小的数，
@@ -176,17 +164,17 @@ void NameSort(Sqlist l){//按姓名排序
     fclose(fp1);
     for(i=1;i<l.length;i++)
     {
-        for(j=1;j<=l.length-i;j++)
+        for(j=1;j<l.length-i;j++)
         {
             if(strcmp(l.s[j].name,l.s[j+1].name)>=0){//选择排序
-                l.s[0]=l.s[j];
+                l.s[0]=l.s[j];   //拿l.s[o]当作哨兵
                 l.s[j]=l.s[j+1];
                 l.s[j+1]=l.s[0];
             }
         }
     }
     printf("按姓名排序为：\n");
-    for(int i=1;i<=l.length;i++)
+    for(int i=1;i<l.length;i++)
     {
         printf("学号:%d  姓名:%s  性别:%d  楼号:%d  房间号:%d\n",l.s[i].number,l.s[i].name,l.s[i].gender,l.s[i].building,l.s[i].room);
     }
@@ -271,6 +259,7 @@ void BuildingSort(Sqlist l)//按楼号进行排序
             }
         }
     }
+
     printf("按楼号排序为：\n");
     for(int i=1;i<=l.length;i++)
     {
@@ -288,7 +277,8 @@ int BinarySearch(int arr[], int low, int high, int target) {
     }
 }
 
-int BinarySearch1(Name arr[],int low,int high,char target[20]){
+int BinarySearch1(Name arr[],int low,int high,char *target){
+
     if(low>high) return -1;
     else{
         int mid=(low+high)/2;
@@ -300,13 +290,8 @@ int BinarySearch1(Name arr[],int low,int high,char target[20]){
                 return BinarySearch1(arr, low, mid - 1, target);
             }
             else {
-                if(strcmp(target,arr[mid].name)>0) {
-                    return BinarySearch1(arr, mid + 1, high, target);
-                }else {
-                    return mid;
-                }
+                return BinarySearch1(arr, mid + 1, high, target);
             }
-
         }
     }
 }
@@ -339,9 +324,7 @@ void NumberSearch(Sqlist l){ //按学号查询
         for (int j = 0; j < l.length; ++j) {
             arr[j]=l.s[j].number;
         }
-
         k=BinarySearch(arr,0,l.length,num);
-
         if(k==-1) printf("没有找到该学生，查询失败！\n");
         else
         printf("学号:%d  姓名:%s  性别:%d  楼号:%d  房间号:%d\n",l.s[k].number,l.s[k].name,l.s[k].gender,l.s[k].building,l.s[k].room);
@@ -358,18 +341,24 @@ void NameSearch(Sqlist l){//按姓名查询
         l.length++;
         i++;
     }
+    l.length--;
     fclose(fp1);
     printf("输入要查询学生的姓名：\n");
     scanf("%s",name.name);
-    //二分查找  先排序再查找
+    getchar();
+    //二分查找
+    // 先排序
     l=NameSort1(l);
-        Name arr[10];
-        for (int j = 0; j < 10; ++j) {
+
+        Name arr[20];
+        for (int j = 0; j < 20; ++j) {
             for (int m = 0; m < 20; ++m) {
-                arr[j].name[m]=l.s[j].name[m];
+                arr[j].name[m] = l.s[j].name[m];
             }
         }
+    //再查找
     k=BinarySearch1(arr,0,l.length,name.name);
+
     if(k==-1) printf("没有找到该学生，查询失败！\n");
     else
         printf("学号:%d  姓名:%s  性别:%d  楼号:%d  房间号:%d\n",l.s[k].number,l.s[k].name,l.s[k].gender,l.s[k].building,l.s[k].room);
@@ -410,11 +399,6 @@ void RoomSearch(Sqlist l){
         }
     }     //得到某个楼的学生的信息
 
-//            printf("%d号楼的所有学生信息:\n",l1.s[0].building);
-//            for (int i = 0; i <l1.length ; ++i) {
-//                printf("学号:%d  姓名:%s  性别:%d  楼号:%d  房间号:%d\n",l1.s[i].number,l1.s[i].name,l1.s[i].gender,l1.s[i].building,l1.s[i].room);
-//            }
-
     Student temp;//按寝室号来对一栋楼sqlist排序
     int j;
     for(i = 1; i < l1.length; i++){ //从原数组的第二个元素进行比较，默认第一个元素已经是排好序的，
@@ -426,11 +410,6 @@ void RoomSearch(Sqlist l){
             l1.s[j+1] = temp;//将temp里的值复制到插入位置
         }
     }//得到某个楼根据房间号排完序的学生的信息
-
-//        printf("%d号楼的按房间号排完序后所有学生信息:\n",l1.s[0].building);
-//        for (int i = 0; i <l1.length ; ++i) {
-//            printf("学号:%d  姓名:%s  性别:%d  楼号:%d  房间号:%d\n",l1.s[i].number,l1.s[i].name,l1.s[i].gender,l1.s[i].building,l1.s[i].room);
-//        }
 
     Sqlist l2;
     int n=0;
@@ -483,6 +462,7 @@ int main(){
     ShowRoom(l);
     while(1)
     {
+        fflush(stdin);
         printf("****************************************");
         printf("\n1.创建\t2.按学号排序\n");
         printf("\n3.按姓名排序\t4.按楼号排序\n");
@@ -519,6 +499,9 @@ int main(){
                 break;
             case 8:
                 exit(0);
+                break;
+            default:
+                printf("输入正常范围的数字选择您要的功能 1~8");
                 break;
         }
     }
